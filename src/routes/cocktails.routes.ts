@@ -1,15 +1,22 @@
 import { Router } from 'express'
+import { getRepository } from 'typeorm'
 
 import CreateCocktailService from '../services/CreateCocktailService'
 
 import ensureAuthenticated from '../middlewares/ensureAuthenticated'
+import Cocktail from '../models/Cocktail'
 
 const cocktailsRouter = Router()
 
 cocktailsRouter.use(ensureAuthenticated)
 
 cocktailsRouter.get('/', async (request, response) => {
-  return response.status(200).json()
+  const cocktailsRepository = getRepository(Cocktail)
+  const { id: user_id } = request.user
+
+  const cocktails = await cocktailsRepository.find({ where: { user_id } })
+
+  return response.status(200).json(cocktails)
 })
 
 cocktailsRouter.post('/', async (request, response) => {
